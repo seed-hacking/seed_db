@@ -12,6 +12,16 @@ SRC_SERVICE_PERL = $(wildcard service-scripts/*.pl)
 BIN_SERVICE_PERL = $(addprefix $(BIN_DIR)/,$(basename $(notdir $(SRC_SERVICE_PERL))))
 DEPLOY_SERVICE_PERL = $(addprefix $(SERVICE_DIR)/bin/,$(basename $(notdir $(SRC_SERVICE_PERL))))
 
+C_PROGS = index_contig_files index_translation_files index_sims_file
+
+SRC_C = $(addprefix scripts/,$(C_PROGS))
+BIN_C = $(addprefix $(BIN_DIR)/,$(C_PROGS))
+DEPLOY_C = $(addprefix $(TARGET)/bin/,$(C_PROGS))
+
+PERL = $(KB_RUNTIME)/bin/perl
+CC =  $(shell $(PERL) -e 'use Config; print $$Config{cc}')
+CFLAGS = $(shell $(PERL) -e 'use Config; print "$$Config{ccflags} -I$$Config{archlib}/CORE -I$(KB_RUNTIME)/lib/perl5/$$Config{version}/$$Config{archname}/CORE"') -O -lm
+
 CLIENT_TESTS = $(wildcard t/client-tests/*.t)
 SERVER_TESTS = $(wildcard t/server-tests/*.t)
 PROD_TESTS = $(wildcard t/prod-tests/*.t)
@@ -27,7 +37,10 @@ TPAGE_ARGS = --define kb_top=$(TARGET) --define kb_runtime=$(DEPLOY_RUNTIME) --d
 
 all: bin 
 
-bin: $(BIN_PERL) $(BIN_SERVICE_PERL)
+bin: $(BIN_PERL) $(BIN_SERVICE_PERL) $(BIN_C)
+
+$(BIN_DIR)/index_contig_files: scripts/index_contig_files.c scripts/md5.c
+	$(CC) $(CFLAGS) -o $@ $^
 
 deploy: deploy-all
 deploy-all: deploy-client 
@@ -55,6 +68,8 @@ deploy-docs:
 
 clean:
 
+$(BIN_DIR)/%: scripts/%.c
+	$(CC) $(CFLAGS) -o $@ $<
 
 $(BIN_DIR)/%: service-scripts/%.pl $(TOP_DIR)/user-env.sh
 	$(WRAP_PERL_SCRIPT) '$$KB_TOP/modules/$(CURRENT_DIR)/$<' $@

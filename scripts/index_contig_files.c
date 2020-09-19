@@ -376,7 +376,7 @@ int index_one ( char * org_id, char * file_num, int infile, int index_interval )
                     }
                     seqlen++;
                     crc = (crc << 8) ^ crctab[ (crc >> 24) ^ c ];
-		    MD5Update(&ctx, &chr, 1);
+		    MD5Update(&ctx, (const U8 *) &chr, 1);
                 }
 
                 /*  All non-nucleotides should be white space */
@@ -397,13 +397,13 @@ int index_one ( char * org_id, char * file_num, int infile, int index_interval )
                     }
                     seqlen++;
                     crc = (crc << 8) ^ crctab[ (crc >> 24) ^ c ];
-		    MD5Update(&ctx, &chr, 1);
+		    MD5Update(&ctx, (const U8 *) &chr, 1);
 
                     /*  But let's add an error message: */
 
                     if ( nerror++ <= MAXERROR ) {
                         if ( nerror <= MAXERROR ) {
-                            fprintf( stderr, "Invalid nucleotide (%c) in %s contig %s\n",
+                            fprintf( stderr, "Invalid nucleotide (%ld) in %s contig %s\n",
                                               c, org_id, idbuf
                                    );
                         }
@@ -452,7 +452,7 @@ void report_len( char * org, char * id, unsigned long seqlen, crc_value_t crc, M
 
 	MD5Final(digest, ctx);
 	hex_16(digest, result);
-        printf( "%s\t%s\t%lu\t%lu\t%s\n", org, id, seqlen, ~crc, result  );
+        printf( "%s\t%s\t%lu\t%u\t%s\n", org, id, seqlen, ~crc, result  );
     }
 }
 

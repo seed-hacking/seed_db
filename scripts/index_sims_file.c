@@ -134,7 +134,7 @@ int main (int argc, char **argv) {
 	    while ( ! isspace( (int) c ) ) {
                 if ( ( iptr - idbuf ) > IDLEN ) {
                     *iptr = '\0';
-                    fprintf( stderr, "Identifier at seek of %lu is > %d bytes\n%s\n",
+                    fprintf( stderr, "Identifier at seek of %llu is > %d bytes\n%s\n",
                              seek, IDLEN, idbuf );
                     exit( 0 );
                 }
@@ -178,7 +178,7 @@ void report_last_seek( char * id, char * filenum, u_long_long seek0, u_long_long
 
 void report_seek( char * id, char * filenum, u_long_long seek0, u_long_long seek ) {
     if ( id && id[0] && filenum && filenum[0] && ( seek > seek0 ) ) {
-        printf("%s\t%s\t%lu\t%lu\n", id, filenum, seek0, seek-seek0);
+        printf("%s\t%s\t%llu\t%llu\n", id, filenum, seek0, seek-seek0);
     }
 }
 

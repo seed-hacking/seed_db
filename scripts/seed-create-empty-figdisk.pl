@@ -27,6 +27,7 @@ make_path($dir,
 	  "$FIG_Config::data/Sims",
 	  "$FIG_Config::global/BBHs",
 	  "$FIG_Config::data/NR",
+	  "$FIG_Config::data/Logs",
 	  "$FIG_Config::data/Ontologies/GO",
     );
 
@@ -36,6 +37,7 @@ touch("$FIG_Config::global/peg.synonyms",
       "$FIG_Config::global/chromosomal_clusters",
       "$FIG_Config::global/id_correspondence",
       "$FIG_Config::data/Ontologies/GO/fr2go",
+      "$FIG_Config::data/Logs/functionalroles.rewrite",
     );
 
 sub touch

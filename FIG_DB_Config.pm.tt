@@ -1,0 +1,10 @@
+package FIG_Config;
+
+no warnings 'once';
+
+$dbms = "[% dbms %]";
+$db = "[% db %]";
+$dbhost = "[% dbhost %]";
+$dbuser = "[% dbuser %]";
+
+1;

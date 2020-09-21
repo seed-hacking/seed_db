@@ -33,11 +33,28 @@ TPAGE_ARGS = --define kb_top=$(TARGET) --define kb_runtime=$(DEPLOY_RUNTIME) --d
 	--define kb_service_port=$(SERVICE_PORT) --define kb_service_dir=$(SERVICE_DIR) \
 	--define kb_sphinx_port=$(SPHINX_PORT) --define kb_sphinx_host=$(SPHINX_HOST) \
 	--define kb_starman_workers=$(STARMAN_WORKERS) \
-	--define kb_starman_max_requests=$(STARMAN_MAX_REQUESTS)
+	--define kb_starman_max_requests=$(STARMAN_MAX_REQUESTS) \
+	--define dbms=$(DBMS) \
+	--define db=$(DB) \
+	--define dbhost=$(DBHOST) \
+	--define dbuser=$(DBUSER) \
 
-all: bin 
+all: bin  fig_config
 
 bin: $(BIN_PERL) $(BIN_SERVICE_PERL) $(BIN_C)
+
+.PHONY: fig_config clean
+
+clean:
+	rm lib/FIG_DB_Config.pm
+
+fig_config: lib/FIG_DB_Config.pm
+
+lib/FIG_DB_Config.pm: FIG_DB_Config.pm.tt Makefile
+ifeq ($(DB),)
+	@echo "DB was not set" 2>&1; exit 1
+endif
+	$(TPAGE) $(TPAGE_ARGS) FIG_DB_Config.pm.tt > lib/FIG_DB_Config.pm
 
 $(BIN_DIR)/index_contig_files: scripts/index_contig_files.c scripts/md5.c
 	$(CC) $(CFLAGS) -o $@ $^

@@ -1111,7 +1111,8 @@ sub load_table {
             # Fix the file name for windows.
             $file =~ tr/\\/\//;
             # Decide whether this is a local file or a server file.
-            if ($self->{_host} ne "localhost" && ! $local) {
+            if ($self->{_host} ne "localhost" && ! $local)
+	    {
                 $local = "LOCAL";
             }
             # Decide whether we are ignoring duplicates.

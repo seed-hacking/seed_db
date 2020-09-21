@@ -20,7 +20,7 @@
 
 ###########################################
 use strict;
-
+use File::Copy;
 use FIG;
 my $fig = new FIG;
 
@@ -66,8 +66,16 @@ $dbf->drop_table( tbl => "fr2go" );
 $dbf->create_table( tbl  => "fr2go",
 		    flds => "role varchar(200), go_id char(10)"
             );
+
+#
+# Modern mysql limits directory we can load from.
+#
+my $tmp = "$FIG_Config::temp/fr2go.$$";
+copy("$FIG_Config::data/Ontologies/GO/fr2go", $tmp) or die "Can't copy to $tmp: $!";
+system("ls -l $tmp");
 $dbf->load_table( tbl => "fr2go",
-		  file => "$FIG_Config::data/Ontologies/GO/fr2go" );
+		  file => $tmp);
+unlink($tmp);
 $dbf->create_index( idx  => "fr2go_fr_ix",
 		    tbl  => "fr2go",
 		    type => "btree",

@@ -84,7 +84,11 @@ open(F, "<$file") or die "Cannot read $file: $!";
 #
 $_ = <F>;
 
-$_ or die "Input file $file is empty\n";
+if (!$_)
+{
+    warn "Input file $file is empty\n";
+    exit 0;
+}
 
 chomp;
 my @cols = split(/\t/, $_);

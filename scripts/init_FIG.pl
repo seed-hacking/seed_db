@@ -17,7 +17,8 @@
 
 use FIG;
 use strict;
-
+use Data::Dumper;
+use IPC::Run qw(run);
 
 #
 # Initialize FIG database.
@@ -137,9 +138,11 @@ if ($FIG_Config::dbms eq "Pg")
 } elsif ($FIG_Config::dbms eq "mysql" && !$FIG_Config::win_mode) {
 
     my @args;
+    my @opts;
     if ($FIG_Config::dbsock ne "")
     {
 	push(@args, -S => $FIG_Config::dbsock);
+	push(@opts, "mysql_socket=$FIG_Config::dbsock");
     }
     push(@args, -u => $FIG_Config::dbuser);
     if ($FIG_Config::dbpass)
@@ -149,13 +152,62 @@ if ($FIG_Config::dbms eq "Pg")
     if ($FIG_Config::dbhost)
     {
 	push(@args, "-h $FIG_Config::dbhost");
+	push(@opts, "host=$FIG_Config::dbhost");
     }
     
-    system("mysqladmin @args drop $FIG_Config::db");
-    system("mysqladmin @args create $FIG_Config::db");
-    open(MYSQL, "| mysql -D $FIG_Config::db @args");
-    print MYSQL "$table_init\n";
-    close(MYSQL);
+    require DBI;
+    my $db_dsn = join(";", "dbi:mysql:$FIG_Config::db", @opts);
+    my $bare_dsn = join(";", "dbi:mysql:", @opts);
+
+    my $dbh = DBI->connect($db_dsn, $FIG_Config::dbuser, $FIG_Config::dbpass, { RaiseError => 0, PrintWarn => 0, PrintError => 0 });
+    if ($dbh)
+    {
+	my $c = $dbh->selectcol_arrayref(qq(SELECT count(*) from genome));
+	if ($c && @$c && $c->[0] > 0)
+	{
+	    print "You are initializing a SEED database named $FIG_Config::db that appears to have live data\n";
+	}
+	else
+	{
+	    print "You are initializing a SEED database named $FIG_Config::db that might contain live data\n";
+	    print "(the database exists, but does not appear to have data)\n";
+	}
+	print "\nDo you wish to continue? (y/n) ";
+	    
+	my $ans = <STDIN>;
+	if ($ans !~ /^y/i)
+	{
+	    exit;
+	}
+	$dbh->do("drop database $FIG_Config::db");
+    }
+
+    print "Creating database $FIG_Config::db\n";
+    my $dbh = DBI->connect($bare_dsn, $FIG_Config::dbuser, $FIG_Config::dbpass, { RaiseError => 0, PrintWarn => 0, PrintError => 0 });
+    if (!$dbh)
+    {
+	print "Could not connect to database: $DBI::errstr\n";
+    }
+
+    my $ok = $dbh->do("create database $FIG_Config::db");
+    if (!$ok)
+    {
+	print "Error creating database\n";
+	exit 1;
+    }
+    $dbh->disconnect();
+
+    my $dbh = DBI->connect($db_dsn, $FIG_Config::dbuser, $FIG_Config::dbpass, { RaiseError => 0, PrintWarn => 0, PrintError => 0 });
+
+    if (!$dbh)
+    {
+	print "Could not connect to new database: $DBI::errstr\n";
+	exit;
+    }
+
+    $dbh->do($table_init);
+    $dbh->disconnect();
+    
 } elsif ($FIG_Config::dbms eq "mysql" && $FIG_Config::win_mode) {
     # Here we're in Windows, and we can't create the database on the
     # command line because of password glitchiness.

@@ -38,8 +38,16 @@ TPAGE_ARGS = --define kb_top=$(TARGET) --define kb_runtime=$(DEPLOY_RUNTIME) --d
 	--define db=$(DB) \
 	--define dbhost=$(DBHOST) \
 	--define dbuser=$(DBUSER) \
+	--define dbpass=$(DBPASS) \
+	--define webapp_db=$(WEBAPP_DB) \
+	--define webapp_host=$(WEBAPP_HOST) \
+	--define webapp_user=$(WEBAPP_USER) \
+	--define webapp_password=$(WEBAPP_PASSWORD) \
+	--define webapp_socket=$(WEBAPP_SOCKET) \
+	--define sv_application_url=$(SV_APPLICATION_URL) \
+	--define sv_admin_email=$(SV_ADMIN_EMAIL)
 
-all: bin  fig_config
+all: bin fig_config web_config
 
 bin: $(BIN_PERL) $(BIN_SERVICE_PERL) $(BIN_C)
 
@@ -55,6 +63,12 @@ ifeq ($(DB),)
 	@echo "DB was not set" 2>&1; exit 1
 endif
 	$(TPAGE) $(TPAGE_ARGS) FIG_DB_Config.pm.tt > lib/FIG_DB_Config.pm
+
+web_config:
+	mkdir -p $(KB_TOP)/lib/WebApplication
+	for app in WebApplication SeedViewer ; do \
+	    $(TPAGE) --define sv_application_name=$$app $(TPAGE_ARGS) Config.pm.tt > $(KB_TOP)/lib/WebApplication/$$app.cfg; \
+	done
 
 $(BIN_DIR)/index_contig_files: scripts/index_contig_files.c scripts/md5.c
 	$(CC) $(CFLAGS) -o $@ $^

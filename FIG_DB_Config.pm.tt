@@ -6,5 +6,12 @@ $dbms = "[% dbms %]";
 $db = "[% db %]";
 $dbhost = "[% dbhost %]";
 $dbuser = "[% dbuser %]";
+$dbpass = "[% dbpass %]";
+
+$webapplication_db = "[% webapp_db %]";
+$webapplication_host = "[% webapp_host %]";
+$webapplication_user = "[% webapp_user %]";
+$webapplication_password = "[% webapp_password %]";
+$webapplication_socket = "[% webapp_socket %]";
 
 1;

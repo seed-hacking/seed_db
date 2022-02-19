@@ -20,3 +20,16 @@ perl Makefile.PL --rpath /usr/local/mysql/lib --verbose --nossl  --libs="-L/usr/
 make OTHERLDFLAGS="-rpath /usr/local/mysql/lib"
 make test
 make install
+
+===
+
+database creation
+
+ mysql> create database seedtest;
+ Query OK, 1 row affected (0.00 sec)
+
+ mysql> create user seed@localhost identified by 'seedlocal';
+ Query OK, 0 rows affected (0.00 sec)
+
+ mysql> grant all privileges on seedtest.* to seed@localhost;
+ Query OK, 0 rows affected (0.00 sec)

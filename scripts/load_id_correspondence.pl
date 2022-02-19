@@ -73,8 +73,13 @@ $dbf->create_table(tbl => $type_table,
 			     )
 		  );
 
+my $tmp = "$FIG_Config::temp/id_load_temp";
+open(TMP, ">$tmp") or die "Cannot write $tmp: $!";
+
 #
 # Read the correspondence file, and split into the 3-column form.
+#
+# If it is missing, jump to the table creation. 
 #
 
 open(F, "<$file") or die "Cannot read $file: $!";
@@ -87,7 +92,7 @@ $_ = <F>;
 if (!$_)
 {
     warn "Input file $file is empty\n";
-    exit 0;
+    goto create_table;
 }
 
 chomp;
@@ -140,9 +145,6 @@ for my $cidx (0..$#cols)
     $col_type[$cidx] = $id;
 }
 
-my $tmp = "$FIG_Config::temp/id_load_temp";
-open(TMP, ">$tmp") or die "Cannot write $tmp: $!";
-
 my $maxlen;
 while (<F>)
 {
@@ -169,6 +171,10 @@ close(TMP);
 
 Trace("Recreating id correspondence table.") if T(2);
 
+$maxlen++;
+
+create_table:
+
 my $file_num_type = "INTEGER";
 my $type_type = "INTEGER";
 if ($FIG_Config::dbms eq 'mysql')
@@ -176,8 +182,8 @@ if ($FIG_Config::dbms eq 'mysql')
     $file_num_type = "SMALLINT UNSIGNED";
     $type_type = "TINYINT UNSIGNED";
 }
+$maxlen //= 32;
 
-$maxlen++;
 $dbf->reload_table('all', $table,
 		   qq(file_num		$file_num_type,
 		      set_id		INTEGER,

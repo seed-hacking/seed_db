@@ -26,11 +26,11 @@ use Getopt::Long::Descriptive;
 
 my $fig = new FIG;
 
+my $tmp = File::Temp->new;
+my @genomes;
+
 my $pf_url = $FIG_Config::pattyfam_compute_url;
 my $pf_kmers = $FIG_Config::pattyfam_kmer_dir;
-
-$pf_url =~ /^http/ or die "Invalid pattyfam compute url '$pf_url'\n";
--d $pf_kmers or die "Invalid pattyfam kmer dir $pf_kmers\n";
 
 # Compute and load pattyfam data for the given seed genome(s).
 
@@ -41,11 +41,18 @@ my($opt, $usage) = describe_options("%c %o [genome genome ...]",
 				    );
 print($usage->text), exit 0 if $opt->help;
 
+if ($pf_url !~ /^http/ || ! -d $pf_kmers)
+{
+    warn "Skipping pattyfam load due to missing compute url or kmers directory\n";
+    goto create_table;
+}
+
 # usage: load_pattyfams [G1 G2 ...]
 
 #  Build list of the genomes to be processed ---------------------------------------
 
-my ($mode, @genomes) = FIG::parse_genome_args(@ARGV);
+my $mode;
+($mode, @genomes) = FIG::parse_genome_args(@ARGV);
 
 #  Gather the data on each genome --------------------------------------------
 
@@ -89,8 +96,6 @@ pareach \@work, sub {
 # Collect results.
 #
 
-my $tmp = File::Temp->new;
-
 foreach my $genome ( @genomes ) {
     my $genome_dir = "$FIG_Config::organisms/$genome";
     
@@ -112,8 +117,10 @@ foreach my $genome ( @genomes ) {
 }
 close($tmp);
 
+create_table:
+
 #  Load the database ---------------------------------------
-if (-s "$tmp") {
+
     $fig->reload_table($mode, "family_membership",
 		       "fid varchar(32) NOT NULL, "
 		       . "family VARCHAR(32), "
@@ -123,9 +130,5 @@ if (-s "$tmp") {
 		       { fam_ix => "family" },
 		       "$tmp", \@genomes);
     
-}
-else {
-    print STDERR "WARNING: No genome data to update\n";
-}
 
 1;

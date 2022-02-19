@@ -91,15 +91,17 @@ if ( @ARGV == 0 ) {
 	closedir( SIMSDIR );
     }
 
-    if ( @sim_files ) {
-		$dbf->drop_table(   tbl  => $seeks_table );
-		$dbf->create_table( tbl  => $seeks_table,
-							flds => "id varchar(64), "
-								  . "fileN INTEGER, "
-								  . "seek INTEGER, "
-								  . "len INTEGER"
-						  );
-    }
+    #
+    # We always do this so a SEED with no sims files will
+    # initialize properly.
+    #
+    $dbf->drop_table(   tbl  => $seeks_table );
+    $dbf->create_table( tbl  => $seeks_table,
+		       flds => "id varchar(64), "
+		       . "fileN INTEGER, "
+		       . "seek INTEGER, "
+		       . "len INTEGER"
+		      );
 } else {
     @sim_files = @ARGV;
 }

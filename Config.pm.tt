@@ -1,0 +1,19 @@
+$APPLICATION_NAME = '[% sv_application_name %]';
+$APPLICATION_URL  = '[% sv_application_url %]';
+$ADMIN_EMAIL      = '[% sv_admin_email %]';
+
+# database information
+$DBNAME = "[% webapp_db %]";
+$DBHOST = "[% webapp_host %]";
+$DBUSER = "[% webapp_user %]";
+$DBPWD  = "[% webapp_password %]";
+$DBPORT = undef;
+
+#
+# For distributed SEED, don't set any login dependencies since we don't
+# need RAST configuration etc.
+#
+$LOGIN_DEPENDENCIES = {};
+
+#$REDIS_CONFIG = { server => "aspen.mcs.anl.gov:6379" };
+#$REDIS_DB = 10;

@@ -125,7 +125,7 @@ create_table:
 		       "fid varchar(32) NOT NULL, "
 		       . "family VARCHAR(32), "
 		       . "score INTEGER, "
-		       . "function TEXT, "
+		       . "family_function TEXT, "
 		       . "PRIMARY KEY ( fid, family )",
 		       { fam_ix => "family" },
 		       "$tmp", \@genomes);

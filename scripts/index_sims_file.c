@@ -35,6 +35,7 @@
 #include <stdio.h>
 #include <ctype.h>   /*  isspace()  */
 #include <stdlib.h>  /*  exit()     */
+#include <string.h>
 #include <unistd.h>  /*  ssize_t read( int fd, void * buf, size_t buflen ); */
                      /*  int close( int fd );  */
 /* int open( char * name, int mode, int perms ); */  /*  acts like it is implicit  */
@@ -177,7 +178,7 @@ void report_last_seek( char * id, char * filenum, u_long_long seek0, u_long_long
 
 
 void report_seek( char * id, char * filenum, u_long_long seek0, u_long_long seek ) {
-    if ( id && id[0] && filenum && filenum[0] && ( seek > seek0 ) ) {
+    if ( id && id[0] && strlen(id) < 64 && filenum && filenum[0] && ( seek > seek0 ) ) {
         printf("%s\t%s\t%llu\t%llu\n", id, filenum, seek0, seek-seek0);
     }
 }

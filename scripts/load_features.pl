@@ -258,7 +258,7 @@ $fig->reload_table($mode, 'features',
 unlink("$temp_dir/tmpfeat$$");
 
 $fig->reload_table($mode, 'ext_alias',
-					"id varchar(32), alias varchar(32), genome varchar(16)",
+					"id varchar(32), alias varchar(64), genome varchar(16)",
 					{ ext_alias_alias_ix => "alias", ext_alias_genome_ix => "genome",
 					  ext_alias_ix_id => "id" },
 					"$temp_dir/tmpalias$$.1", \@genomes );

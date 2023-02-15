@@ -28,6 +28,7 @@ use FIG;
 use DBrtns;
 use Tracer;
 use Getopt::Long;
+use File::Path qw(make_path);
 
 my $usage =  "Usage: $0 [--dbname database-name] [--table tablename] [--dir sims-dir] [ File1 File2 ... ]";
 
@@ -60,7 +61,9 @@ if ($sims_db)
 my $fig = new FIG;
 my $dbf = $fig->db_handle;
 
-my $seeks_file   = "$FIG_Config::temp/sims_seeks_tmp.$$";
+make_path("/dev/shm/fig");
+my $seeks_file   = "/dev/shm/fig/sims_seeks_tmp.$$";
+#my $seeks_file   = "$FIG_Config::temp/sims_seeks_tmp.$$";
 
 
 #

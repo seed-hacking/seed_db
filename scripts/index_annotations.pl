@@ -78,7 +78,7 @@ close(RELTABLE);
 if ($reload)
 {
     $fig->reload_table('all', "annotation_seeks",
-		       "fid varchar(32) NOT NULL, dateof INTEGER, who varchar(32), "
+		       "fid varchar(32) NOT NULL, dateof INTEGER, who varchar(64), "
 		       . "ma char, fileno INTEGER, seek INTEGER, len INTEGER",
 		   { annotations_fig_ix => "fid", annotations_who_ix => "who",
 			 annotations_dateof_ix => "dateof" },

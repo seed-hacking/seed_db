@@ -26,7 +26,8 @@ use Getopt::Long::Descriptive;
 
 my $fig = new FIG;
 
-my $tmp = File::Temp->new;
+#my $tmp = File::Temp->new;
+my $tmp = "$FIG_Config::temp/patty.$$";
 my @genomes;
 
 my $pf_url = $FIG_Config::pattyfam_compute_url;
@@ -35,13 +36,14 @@ my $pf_kmers = $FIG_Config::pattyfam_kmer_dir;
 # Compute and load pattyfam data for the given seed genome(s).
 
 my($opt, $usage) = describe_options("%c %o [genome genome ...]",
+				    ["no-compute|n", "Don't try to compute fams, just load cached data"],
 				    ["parallel|p=i", "Number of process to run in parallel",
 				 	{ default => 1 }],
 				    ["help|h" => "Show this help message"],
 				    );
 print($usage->text), exit 0 if $opt->help;
 
-if ($pf_url !~ /^http/ || ! -d $pf_kmers)
+if (($pf_url !~ /^http/ || ! -d $pf_kmers) && !$opt->no_compute)
 {
     warn "Skipping pattyfam load due to missing compute url or kmers directory\n";
     goto create_table;
@@ -69,7 +71,7 @@ foreach my $genome ( @genomes ) {
 
     my $pf_file = "$genome_dir/pattyfams.txt";
 
-    if (!-s $pf_file)
+    if (!$opt->no_compute && !-s $pf_file)
     {
 	my $gs = $fig->genus_species($genome);
 	my($genus) = $gs =~ /^(\S+)/;
@@ -96,6 +98,7 @@ pareach \@work, sub {
 # Collect results.
 #
 
+open(TMP, ">", $tmp) or die "Cannot write $tmp: $!";
 foreach my $genome ( @genomes ) {
     my $genome_dir = "$FIG_Config::organisms/$genome";
     
@@ -106,16 +109,30 @@ foreach my $genome ( @genomes ) {
 
     my $pf_file = "$genome_dir/pattyfams.txt";
 
-    open(P, "<", $pf_file) or die "Cannot open $pf_file: $!";
-    while (<P>)
+    my %seen;
+    if (open(P, "<", $pf_file))
     {
-	my($fid) = /^(\S+)/;
-	# next unless $fig->is_real_feature($fid);
-	print $tmp $_;
+	while (<P>)
+	{
+	    my($fid, $fam) = split(/\t/);
+	    if ($seen{$fid, $fam}++)
+	    {
+		warn "Dup: $fid $fam\n";
+		next;
+	    }
+	    # next unless $fig->is_real_feature($fid);
+	    next unless $fid =~ /^fig\|/;
+	    print TMP $_;
+	}
+	close(P);
     }
-    close(P);
+    else
+    {
+	warn "Cannot open $pf_file: $!\n";
+    }
+
 }
-close($tmp);
+close(TMP);
 
 create_table:
 
@@ -131,4 +148,5 @@ create_table:
 		       "$tmp", \@genomes);
     
 
+unlink($tmp);
 1;

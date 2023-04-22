@@ -81,11 +81,22 @@ for my $ss_name (@ARGV)
 	}
     }
 
-    my $res = $ua->post("$seed/subsystem_server.cgi",
-    			{ function => "subsystem_spreadsheet", args => $names_doc });
-    if (!$res->is_success)
+    my $res;
+    for my $retry (1..10)
     {
-    	die "Failure retrieving spreadsheet for $ss_name\n";
+	my $this_res = $ua->post("$seed/subsystem_server.cgi",
+			 { function => "subsystem_spreadsheet", args => $names_doc });
+	if ($this_res->is_success)
+	{
+	    $res = $this_res;
+	    last;
+	}
+	warn "Failure retrieving spreadsheet for $ss_name: " . $res->status_line . " " . $res->content;
+	sleep 10;
+    }
+    if (!$res)
+    {
+	die "Failed to retrieve spreadsheet for $ss_name after retrying\n";
     }
     my $spreadsheet = Load($res->content);
 
